@@ -96,10 +96,10 @@ Before deploying, ensure you have:
 cd auto_service_backend
 
 # Build the image
-docker build -t your-registry/auto-service-backend:latest .
+docker build -t nayodya/auto-service-backend:v1 .
 
 # Push to registry
-docker push your-registry/auto-service-backend:latest
+docker push nayodya/auto-service-backend:v1
 ```
 
 ### 2. Build Frontend Image
@@ -108,13 +108,13 @@ docker push your-registry/auto-service-backend:latest
 cd auto_service_frontend
 
 # Build the image
-docker build -t your-registry/auto-service-frontend:latest .
+docker build -t nayodya/auto-service-frontend:v1 .
 
 # Push to registry
-docker push your-registry/auto-service-frontend:latest
+docker push nayodya/auto-service-frontend:v1
 ```
 
-**Note**: Replace `your-registry` with your actual Docker registry (e.g., `docker.io/yourusername`, `gcr.io/project-id`, etc.)
+**Note**: Replace `nayodya` with your actual Docker registry (e.g., `docker.io/yourusername`, `gcr.io/project-id`, etc.)
 
 ## ⚙️ Configuration
 
@@ -129,7 +129,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: your-registry/auto-service-backend:latest  # Update this
+        image: nayodya/auto-service-backend:v1  # Update this
 ```
 
 **Frontend** (`kubernetes/frontend/deployment.yaml`):
@@ -139,7 +139,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: your-registry/auto-service-frontend:latest  # Update this
+        image: nayodya/auto-service-frontend:v1  # Update this
 ```
 
 ### 2. Update Domain Names
@@ -336,11 +336,11 @@ minikube addons list | grep ingress
 
 ```bash
 # Build and push new image
-docker build -t your-registry/auto-service-backend:v2 auto_service_backend/
-docker push your-registry/auto-service-backend:v2
+docker build -t nayodya/auto-service-backend:v2 auto_service_backend/
+docker push nayodya/auto-service-backend:v2
 
 # Update deployment
-kubectl set image deployment/backend backend=your-registry/auto-service-backend:v2 -n auto-service
+kubectl set image deployment/backend backend=nayodya/auto-service-backend:v2 -n auto-service
 
 # Or edit deployment file and apply
 kubectl apply -f kubernetes/backend/deployment.yaml
@@ -350,11 +350,11 @@ kubectl apply -f kubernetes/backend/deployment.yaml
 
 ```bash
 # Build and push new image
-docker build -t your-registry/auto-service-frontend:v2 auto_service_frontend/
-docker push your-registry/auto-service-frontend:v2
+docker build -t nayodya/auto-service-frontend:v2 auto_service_frontend/
+docker push nayodya/auto-service-frontend:v2
 
 # Update deployment
-kubectl set image deployment/frontend frontend=your-registry/auto-service-frontend:v2 -n auto-service
+kubectl set image deployment/frontend frontend=nayodya/auto-service-frontend:v2 -n auto-service
 ```
 
 ## 📊 Scaling
@@ -413,7 +413,7 @@ kubectl delete -f kubernetes/database/
 4. **Image Security**:
    - Use official base images
    - Scan images for vulnerabilities
-   - Use specific image tags, not `latest`
+   - Use specific image tags, not `v1`
 
 ## 📝 Additional Resources
 
