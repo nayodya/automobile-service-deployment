@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auto-service
+  labels:
+    name: auto-service
+    environment: production
