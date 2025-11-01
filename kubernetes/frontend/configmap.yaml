@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: frontend-config
-  namespace: auto-service
-data:
-  # API Configuration
-  VITE_API_BASE_URL: "http://auto-service.local/api"
-  # Add other environment variables your React app needs
