@@ -1,0 +1,22 @@
+# Frontend Service Configuration
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: autoservice
+  labels:
+    app: frontend
+    tier: presentation
+spec:
+  type: LoadBalancer  # Exposes service externally
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800

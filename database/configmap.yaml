@@ -1,0 +1,12 @@
+# ConfigMap for PostgreSQL Database
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: autoservice
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: "autoservice_db"
+  POSTGRES_USER: "postgres"
+  PGDATA: "/var/lib/postgresql/data/pgdata"
