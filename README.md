@@ -1,303 +1,604 @@
-cat > /mnt/user-data/outputs/deployment/DEPLOYMENT_SUMMARY.md << 'EOF'
+# Automobile Service - Kubernetes Deploymentcat > /mnt/user-data/outputs/deployment/DEPLOYMENT_SUMMARY.md << 'EOF'
+
 # Docker & Kubernetes Deployment Files
-## Complete Containerization and Orchestration
 
----
+Kubernetes deployment configuration for the Automobile Service Management System.## Complete Containerization and Orchestration
 
-## 📦 What's Included
 
-### Repositories
+
+## 📋 Overview---
+
+
+
+This repository contains Kubernetes manifests for deploying a full-stack application consisting of:## 📦 What's Included
+
+- **Frontend**: React application (Vite + Nginx)
+
+- **Backend**: Spring Boot REST API### Repositories
+
+- **Database**: PostgreSQL with persistent storage
 
 -Frontend Repo : https://github.com/Chamithjay/auto_service_frontend.git
--Backend Repo  : https://github.com/Chamithjay/auto_service_backend.git
+
+## 🏗️ Architecture-Backend Repo  : https://github.com/Chamithjay/auto_service_backend.git
 
 
-### Docker Files (5 files)
 
-**Backend:**
-- `Dockerfile` - Multi-stage build for Spring Boot
-- `.dockerignore` - Excludes unnecessary files
+```
 
-**Frontend:**
-- `Dockerfile` - Multi-stage build with Nginx
-- `.dockerignore` - Excludes node_modules, etc.
-- `nginx.conf` - Nginx configuration for React
+┌─────────────────┐### Docker Files (5 files)
 
-### Kubernetes Files (22 files)
+│   Frontend      │ (React + Nginx)
 
-**Common (3 files):**
-- `namespace.yaml` - Application namespace
-- `ingress.yaml` - HTTP/HTTPS routing
-- `network-policy.yaml` - Network security
+│   Port: 80      │**Backend:**
 
-**Backend (5 files):**
+└────────┬────────┘- `Dockerfile` - Multi-stage build for Spring Boot
+
+         │- `.dockerignore` - Excludes unnecessary files
+
+         ▼
+
+┌─────────────────┐**Frontend:**
+
+│   Backend       │ (Spring Boot)- `Dockerfile` - Multi-stage build with Nginx
+
+│   Port: 8080    │- `.dockerignore` - Excludes node_modules, etc.
+
+└────────┬────────┘- `nginx.conf` - Nginx configuration for React
+
+         │
+
+         ▼### Kubernetes Files (22 files)
+
+┌─────────────────┐
+
+│   PostgreSQL    │**Common (3 files):**
+
+│   Port: 5432    │- `namespace.yaml` - Application namespace
+
+└─────────────────┘- `ingress.yaml` - HTTP/HTTPS routing
+
+```- `network-policy.yaml` - Network security
+
+
+
+## 📁 Project Structure**Backend (5 files):**
+
 - `configmap.yaml` - Configuration
-- `secret.yaml` - Sensitive data
-- `deployment.yaml` - Pod specification
-- `service.yaml` - Service endpoint
-- `hpa.yaml` - Auto-scaling
 
-**Frontend (4 files):**
-- `configmap.yaml` - Configuration
-- `deployment.yaml` - Pod specification
-- `service.yaml` - LoadBalancer
-- `hpa.yaml` - Auto-scaling
+```- `secret.yaml` - Sensitive data
 
-**Database (5 files):**
-- `configmap.yaml` - PostgreSQL config
-- `secret.yaml` - Database password
-- `pvc.yaml` - Persistent storage
-- `statefulset.yaml` - PostgreSQL deployment
-- `service.yaml` - Service endpoint
+automobile-service-deployment/- `deployment.yaml` - Pod specification
 
-**Scripts (2 files):**
-- `deploy.sh` - Automated deployment
-- `cleanup.sh` - Cleanup script
+├── backend/- `service.yaml` - Service endpoint
 
-**Documentation (1 file):**
-- `KUBERNETES_GUIDE.md` - Comprehensive guide
+│   ├── configmap.yaml      # Backend configuration- `hpa.yaml` - Auto-scaling
 
----
+│   ├── secret.yaml         # Sensitive credentials
+
+│   ├── deployment.yaml     # Backend pod specification**Frontend (4 files):**
+
+│   ├── service.yaml        # Backend service endpoint- `configmap.yaml` - Configuration
+
+│   └── hpa.yaml           # Horizontal Pod Autoscaler- `deployment.yaml` - Pod specification
+
+├── frontend/- `service.yaml` - LoadBalancer
+
+│   ├── configmap.yaml      # Frontend configuration- `hpa.yaml` - Auto-scaling
+
+│   ├── deployment.yaml     # Frontend pod specification
+
+│   ├── service.yaml        # Frontend LoadBalancer**Database (5 files):**
+
+│   └── hpa.yaml           # Horizontal Pod Autoscaler- `configmap.yaml` - PostgreSQL config
+
+├── database/- `secret.yaml` - Database password
+
+│   ├── configmap.yaml      # PostgreSQL configuration- `pvc.yaml` - Persistent storage
+
+│   ├── secret.yaml         # Database credentials- `statefulset.yaml` - PostgreSQL deployment
+
+│   ├── pvc.yaml           # Persistent volume claim- `service.yaml` - Service endpoint
+
+│   ├── statefulset.yaml   # PostgreSQL stateful deployment
+
+│   └── service.yaml       # Database service**Scripts (2 files):**
+
+├── common/- `deploy.sh` - Automated deployment
+
+│   ├── namespace.yaml      # Application namespace- `cleanup.sh` - Cleanup script
+
+│   ├── ingress.yaml       # HTTP routing (optional)
+
+│   └── network-policy.yaml # Network security (optional)**Documentation (1 file):**
+
+├── deploy.sh              # Automated deployment script- `KUBERNETES_GUIDE.md` - Comprehensive guide
+
+├── cleanup.sh             # Cleanup script
+
+└── docker-compose.yml     # Docker Compose alternative---
+
+```
+
+## 🚀 Quick Start
 
 ## 🚀 Quick Start
 
 ### Step 1: Build Docker Images
 
-```bash
-# Backend
-cd your-backend-project
-docker build -t autoservice-backend:latest -f path/to/docker/backend/Dockerfile .
+### Prerequisites
 
-# Frontend
+```bash
+
+- Kubernetes cluster (Minikube, Docker Desktop, or cloud provider)# Backend
+
+- `kubectl` CLI installedcd your-backend-project
+
+- Docker images built and availabledocker build -t autoservice-backend:latest -f path/to/docker/backend/Dockerfile .
+
+
+
+### Option 1: Automated Deployment (Recommended)# Frontend
+
 cd your-frontend-project
-docker build -t autoservice-frontend:latest -f path/to/docker/frontend/Dockerfile .
-```
+
+```bashdocker build -t autoservice-frontend:latest -f path/to/docker/frontend/Dockerfile .
+
+# Make scripts executable```
+
+chmod +x deploy.sh cleanup.sh
 
 ### Step 2: Deploy to Kubernetes
 
-```bash
-cd kubernetes
+# Deploy all components
+
+./deploy.sh```bash
+
+```cd kubernetes
+
 chmod +x deploy.sh cleanup.sh
-./deploy.sh
-```
 
-### Step 3: Access Application
+### Option 2: Manual Deployment./deploy.sh
+
+```
 
 ```bash
-# Get the external IP
-kubectl get service frontend-service -n autoservice
 
-# Access at http://<EXTERNAL-IP>
-```
+# 1. Create namespace### Step 3: Access Application
 
----
+kubectl apply -f common/namespace.yaml
+
+```bash
+
+# 2. Deploy database# Get the external IP
+
+kubectl apply -f database/kubectl get service frontend-service -n autoservice
+
+
+
+# 3. Wait for database to be ready# Access at http://<EXTERNAL-IP>
+
+kubectl wait --for=condition=ready pod -l app=postgres -n autoservice --timeout=300s```
+
+
+
+# 4. Deploy backend---
+
+kubectl apply -f backend/
 
 ## 📁 File Structure
 
-```
-deployment/
-├── docker/
-│   ├── backend/
-│   │   ├── Dockerfile
-│   │   └── .dockerignore
-│   └── frontend/
-│       ├── Dockerfile
-│       ├── .dockerignore
-│       └── nginx.conf
-│
-├── kubernetes/
-│   ├── backend/
-│   │   ├── configmap.yaml
-│   │   ├── secret.yaml
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── hpa.yaml
-│   ├── frontend/
-│   │   ├── configmap.yaml
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── hpa.yaml
-│   ├── database/
-│   │   ├── configmap.yaml
-│   │   ├── secret.yaml
-│   │   ├── pvc.yaml
-│   │   ├── statefulset.yaml
-│   │   └── service.yaml
-│   ├── common/
-│   │   ├── namespace.yaml
-│   │   ├── ingress.yaml
-│   │   └── network-policy.yaml
-│   ├── deploy.sh
-│   └── cleanup.sh
-│
-├── KUBERNETES_GUIDE.md
-└── DEPLOYMENT_SUMMARY.md (this file)
-```
+# 5. Wait for backend to be ready
 
----
+kubectl wait --for=condition=ready pod -l app=backend -n autoservice --timeout=300s```
+
+deployment/
+
+# 6. Deploy frontend├── docker/
+
+kubectl apply -f frontend/│   ├── backend/
+
+```│   │   ├── Dockerfile
+
+│   │   └── .dockerignore
+
+## 🔧 Configuration│   └── frontend/
+
+│       ├── Dockerfile
+
+### Before Deployment│       ├── .dockerignore
+
+│       └── nginx.conf
+
+1. **Update Docker Image References** (if using custom registry):│
+
+   ```bash├── kubernetes/
+
+   # In backend/deployment.yaml and frontend/deployment.yaml│   ├── backend/
+
+   image: your-registry/autoservice-backend:latest│   │   ├── configmap.yaml
+
+   image: your-registry/autoservice-frontend:latest│   │   ├── secret.yaml
+
+   ```│   │   ├── deployment.yaml
+
+│   │   ├── service.yaml
+
+2. **Configure Secrets** (Base64 encoded):│   │   └── hpa.yaml
+
+   ```bash│   ├── frontend/
+
+   # Encode your values│   │   ├── configmap.yaml
+
+   echo -n 'your-password' | base64│   │   ├── deployment.yaml
+
+   │   │   ├── service.yaml
+
+   # Update in backend/secret.yaml and database/secret.yaml│   │   └── hpa.yaml
+
+   ```│   ├── database/
+
+│   │   ├── configmap.yaml
+
+### Environment Variables│   │   ├── secret.yaml
+
+│   │   ├── pvc.yaml
+
+**Backend** (`backend/configmap.yaml`):│   │   ├── statefulset.yaml
+
+- `SPRING_DATASOURCE_URL`: Database connection URL│   │   └── service.yaml
+
+- `SERVER_PORT`: Backend server port (8080)│   ├── common/
+
+- `JWT_EXPIRATION`: JWT token expiration time│   │   ├── namespace.yaml
+
+│   │   ├── ingress.yaml
+
+**Frontend** (`frontend/configmap.yaml`):│   │   └── network-policy.yaml
+
+- `VITE_API_BASE_URL`: Backend API URL│   ├── deploy.sh
+
+│   └── cleanup.sh
+
+## 📊 Resource Limits│
+
+├── KUBERNETES_GUIDE.md
+
+| Component | Requests (CPU/Memory) | Limits (CPU/Memory) | Replicas |└── DEPLOYMENT_SUMMARY.md (this file)
+
+|-----------|----------------------|---------------------|----------|```
+
+| Frontend  | 100m / 128Mi         | 200m / 256Mi        | 2-10     |
+
+| Backend   | 250m / 512Mi         | 500m / 1Gi          | 2-10     |---
+
+| Database  | 250m / 256Mi         | 500m / 512Mi        | 1        |
 
 ## 🎯 Key Features
 
+Auto-scaling configured at 70% CPU utilization.
+
 ### Docker
-- ✅ Multi-stage builds for optimization
+
+## 🌐 Accessing the Application- ✅ Multi-stage builds for optimization
+
 - ✅ Security: Non-root users
-- ✅ Health checks configured
+
+### Minikube- ✅ Health checks configured
+
 - ✅ Minimal base images (Alpine)
-- ✅ Production-ready
 
-### Kubernetes
+```bash- ✅ Production-ready
+
+# Get service URL
+
+minikube service frontend-service -n autoservice### Kubernetes
+
 - ✅ Auto-scaling (HPA)
-- ✅ High availability (2+ replicas)
-- ✅ Health checks (liveness, readiness, startup)
-- ✅ Resource limits and requests
-- ✅ Persistent storage for database
-- ✅ Network security policies
-- ✅ ConfigMaps and Secrets
-- ✅ LoadBalancer service
-- ✅ Ingress for routing
-- ✅ Automated deployment scripts
 
----
+# Or use port forwarding- ✅ High availability (2+ replicas)
+
+kubectl port-forward service/frontend-service 8080:80 -n autoservice- ✅ Health checks (liveness, readiness, startup)
+
+```- ✅ Resource limits and requests
+
+- ✅ Persistent storage for database
+
+### Cloud Provider (LoadBalancer)- ✅ Network security policies
+
+- ✅ ConfigMaps and Secrets
+
+```bash- ✅ LoadBalancer service
+
+# Get external IP- ✅ Ingress for routing
+
+kubectl get service frontend-service -n autoservice- ✅ Automated deployment scripts
+
+
+
+# Access at http://<EXTERNAL-IP>---
+
+```
 
 ## 🔧 Configuration
 
+## 🛠️ Management Commands
+
 ### Update Before Deployment
 
+### View Resources
+
 **1. Backend Secret (`backend/secret.yaml`):**
-```yaml
-# Update these base64 encoded values:
-DB_USERNAME: <your-db-username-base64>
+
+```bash```yaml
+
+# All resources# Update these base64 encoded values:
+
+kubectl get all -n autoserviceDB_USERNAME: <your-db-username-base64>
+
 DB_PASSWORD: <your-db-password-base64>
-JWT_SECRET: <your-jwt-secret-base64>
-EMAIL_USERNAME: <your-email-base64>
+
+# PodsJWT_SECRET: <your-jwt-secret-base64>
+
+kubectl get pods -n autoserviceEMAIL_USERNAME: <your-email-base64>
+
 EMAIL_PASSWORD: <your-email-password-base64>
-```
+
+# Services```
+
+kubectl get services -n autoservice
 
 **Encode values:**
-```bash
-echo -n 'your-value' | base64
-```
 
-**2. Database Secret (`database/secret.yaml`):**
+# Persistent volumes```bash
+
+kubectl get pvc -n autoserviceecho -n 'your-value' | base64
+
+``````
+
+
+
+### View Logs**2. Database Secret (`database/secret.yaml`):**
+
 ```yaml
-POSTGRES_PASSWORD: <your-db-password-base64>
-```
+
+```bashPOSTGRES_PASSWORD: <your-db-password-base64>
+
+# Frontend logs```
+
+kubectl logs -f deployment/frontend-deployment -n autoservice
 
 **3. Image Names:**
-Update image names in deployment files if using a container registry:
-```yaml
+
+# Backend logsUpdate image names in deployment files if using a container registry:
+
+kubectl logs -f deployment/backend-deployment -n autoservice```yaml
+
 image: your-registry.com/autoservice-backend:latest
+
+# Database logs```
+
+kubectl logs -f statefulset/postgres-statefulset -n autoservice
+
+```---
+
+
+
+### Scale Deployments## 📊 Resource Allocation
+
+
+
+```bash### Backend
+
+# Manual scaling- **Requests:** 512Mi memory, 250m CPU
+
+kubectl scale deployment backend-deployment --replicas=5 -n autoservice- **Limits:** 1Gi memory, 500m CPU
+
+kubectl scale deployment frontend-deployment --replicas=3 -n autoservice- **Replicas:** 2-10 (auto-scaling at 70% CPU)
+
 ```
-
----
-
-## 📊 Resource Allocation
-
-### Backend
-- **Requests:** 512Mi memory, 250m CPU
-- **Limits:** 1Gi memory, 500m CPU
-- **Replicas:** 2-10 (auto-scaling at 70% CPU)
 
 ### Frontend
-- **Requests:** 128Mi memory, 100m CPU
+
+### Update Deployment- **Requests:** 128Mi memory, 100m CPU
+
 - **Limits:** 256Mi memory, 200m CPU
-- **Replicas:** 2-10 (auto-scaling at 70% CPU)
 
-### Database
+```bash- **Replicas:** 2-10 (auto-scaling at 70% CPU)
+
+# Update image
+
+kubectl set image deployment/backend-deployment backend=autoservice-backend:v2 -n autoservice### Database
+
 - **Requests:** 256Mi memory, 250m CPU
-- **Limits:** 512Mi memory, 500m CPU
-- **Storage:** 10Gi persistent volume
 
----
+# Restart deployment- **Limits:** 512Mi memory, 500m CPU
 
-## 🔐 Security Features
+kubectl rollout restart deployment/backend-deployment -n autoservice- **Storage:** 10Gi persistent volume
 
-### Network Policies
+
+
+# Check rollout status---
+
+kubectl rollout status deployment/backend-deployment -n autoservice
+
+```## 🔐 Security Features
+
+
+
+## 🧹 Cleanup### Network Policies
+
 1. Frontend → Backend communication only
-2. Backend → Database communication only
-3. Ingress → Frontend access only
-4. Default deny all other traffic
 
-### Pod Security
+### Using Script2. Backend → Database communication only
+
+3. Ingress → Frontend access only
+
+```bash4. Default deny all other traffic
+
+./cleanup.sh
+
+```### Pod Security
+
 - Non-root users
-- Read-only root filesystem
-- Dropped capabilities
-- Security contexts configured
+
+The script will prompt you to:- Read-only root filesystem
+
+- Delete all resources- Dropped capabilities
+
+- Keep or delete PVC (database data)- Security contexts configured
+
+- Keep or delete namespace
 
 ### Secrets Management
-- Base64 encoded secrets
+
+### Manual Cleanup- Base64 encoded secrets
+
 - Kubernetes secret objects
-- Environment variable injection
-- **Recommendation:** Use external secret managers in production
+
+```bash- Environment variable injection
+
+# Delete all resources except PVC- **Recommendation:** Use external secret managers in production
+
+kubectl delete all -n autoservice --all
 
 ---
 
-## 📝 Deployment Steps
+# Delete PVC (WARNING: deletes all data)
 
-### Automatic (Recommended)
+kubectl delete pvc -n autoservice --all## 📝 Deployment Steps
 
-```bash
+
+
+# Delete namespace (deletes everything)### Automatic (Recommended)
+
+kubectl delete namespace autoservice
+
+``````bash
+
 cd kubernetes
-./deploy.sh
+
+## 🐛 Troubleshooting./deploy.sh
+
 ```
+
+### Pods Not Starting
 
 **The script will:**
-1. ✅ Create namespace
-2. ✅ Deploy database with persistent storage
-3. ✅ Wait for database to be ready
+
+```bash1. ✅ Create namespace
+
+# Describe pod to see events2. ✅ Deploy database with persistent storage
+
+kubectl describe pod <pod-name> -n autoservice3. ✅ Wait for database to be ready
+
 4. ✅ Deploy backend application
-5. ✅ Wait for backend to be ready
-6. ✅ Deploy frontend application
+
+# Check logs5. ✅ Wait for backend to be ready
+
+kubectl logs <pod-name> -n autoservice6. ✅ Deploy frontend application
+
 7. ✅ Wait for frontend to be ready
-8. ✅ Apply network policies
-9. ✅ Apply ingress configuration
-10. ✅ Display deployment status
 
-### Manual
+# Check previous logs (if pod restarted)8. ✅ Apply network policies
 
-```bash
-# 1. Namespace
-kubectl apply -f common/namespace.yaml
+kubectl logs <pod-name> -n autoservice --previous9. ✅ Apply ingress configuration
 
-# 2. Database
-kubectl apply -f database/
+```10. ✅ Display deployment status
 
-# 3. Backend (after database is ready)
-kubectl apply -f backend/
 
-# 4. Frontend (after backend is ready)
-kubectl apply -f frontend/
 
-# 5. Common resources
-kubectl apply -f common/
+### Database Connection Issues### Manual
+
+
+
+```bash```bash
+
+# Test database connectivity# 1. Namespace
+
+kubectl exec -it postgres-statefulset-0 -n autoservice -- psql -U postgreskubectl apply -f common/namespace.yaml
+
+
+
+# Check database logs# 2. Database
+
+kubectl logs postgres-statefulset-0 -n autoservicekubectl apply -f database/
+
+
+
+# Verify database service# 3. Backend (after database is ready)
+
+kubectl get endpoints postgres-service -n autoservicekubectl apply -f backend/
+
 ```
 
----
+# 4. Frontend (after backend is ready)
+
+### Service Not Accessiblekubectl apply -f frontend/
+
+
+
+```bash# 5. Common resources
+
+# Check service endpointskubectl apply -f common/
+
+kubectl get endpoints -n autoservice```
+
+
+
+# Describe service---
+
+kubectl describe service frontend-service -n autoservice
 
 ## 🎛️ Management Commands
 
-### View Resources
-```bash
+# Test internal connectivity
+
+kubectl run -it --rm debug --image=curlimages/curl --restart=Never -n autoservice -- sh### View Resources
+
+``````bash
+
 kubectl get all -n autoservice
-kubectl get pods -n autoservice
+
+## 📝 Noteskubectl get pods -n autoservice
+
 kubectl get services -n autoservice
-kubectl get hpa -n autoservice
-```
 
-### View Logs
+- **Persistent Storage**: Database data is stored in a Persistent Volume (10Gi)kubectl get hpa -n autoservice
+
+- **Auto-scaling**: HPA configured for frontend and backend (2-10 replicas)```
+
+- **Health Checks**: Liveness and readiness probes configured for all services
+
+- **Security**: Secrets are base64 encoded (use external secret managers for production)### View Logs
+
 ```bash
-kubectl logs -f deployment/backend-deployment -n autoservice
+
+## 🔗 Related Repositorieskubectl logs -f deployment/backend-deployment -n autoservice
+
 kubectl logs -f deployment/frontend-deployment -n autoservice
-kubectl logs -f statefulset/postgres-statefulset -n autoservice
-```
 
-### Port Forwarding
+- Frontend: https://github.com/Chamithjay/auto_service_frontendkubectl logs -f statefulset/postgres-statefulset -n autoservice
+
+- Backend: https://github.com/Chamithjay/auto_service_backend```
+
+
+
+## 📄 License### Port Forwarding
+
 ```bash
-# Backend
+
+This project is part of the Automobile Service Management System.# Backend
+
 kubectl port-forward service/backend-service 8080:8080 -n autoservice
 
+---
+
 # Frontend
-kubectl port-forward service/frontend-service 8081:80 -n autoservice
+
+**Version**: 1.0  kubectl port-forward service/frontend-service 8081:80 -n autoservice
+
+**Last Updated**: November 2025
 
 # Database
 kubectl port-forward service/postgres-service 5432:5432 -n autoservice
