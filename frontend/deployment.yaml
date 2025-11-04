@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: autoservice-frontend:latest  # Replace with your actual image
+        image: automobile-service-deployment-frontend:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -78,9 +78,3 @@ spec:
       
       # Restart policy
       restartPolicy: Always
-      
-      # Security context
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 101  # nginx user
-        fsGroup: 101
