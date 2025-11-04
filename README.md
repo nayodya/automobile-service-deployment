@@ -6,6 +6,12 @@ cat > /mnt/user-data/outputs/deployment/DEPLOYMENT_SUMMARY.md << 'EOF'
 
 ## 📦 What's Included
 
+### Repositories
+
+Frontend Repo : https://github.com/Chamithjay/auto_service_frontend.git
+Backend Repo  : https://github.com/Chamithjay/auto_service_backend.git
+
+
 ### Docker Files (5 files)
 
 **Backend:**
