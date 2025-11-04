@@ -1,17 +1,16 @@
-# Frontend Deployment Configuration
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: backend-deployment
   namespace: autoservice
   labels:
-    app: frontend
-    tier: presentation
+    app: backend
+    tier: application
 spec:
-  replicas: 2  # Number of pod replicas
+  replicas: 2
   selector:
     matchLabels:
-      app: frontend
+      app: backend
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -20,67 +19,48 @@ spec:
   template:
     metadata:
       labels:
-        app: frontend
-        tier: presentation
+        app: backend
+        tier: application
     spec:
       containers:
-      - name: frontend
-        image: autoservice-frontend:latest  # Replace with your actual image
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 80
-          name: http
-          protocol: TCP
-        
-        # Environment variables from ConfigMap
-        envFrom:
-        - configMapRef:
-            name: frontend-config
-        
-        # Resource limits and requests
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        
-        # Liveness probe
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 80
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        
-        # Readiness probe
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-        
-        # Startup probe
-        startupProbe:
-          httpGet:
-            path: /health
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 10
-      
-      # Restart policy
+        - name: backend
+          image: automobile-service-deployment-backend:v2
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          envFrom:
+          - configMapRef:
+              name: backend-config
+          - secretRef:
+              name: backend-secret
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
       restartPolicy: Always
-      
-      # Security context
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 101  # nginx user
-        fsGroup: 101
