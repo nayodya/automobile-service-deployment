@@ -24,8 +24,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: automobile-service-deployment-backend:v2
-          imagePullPolicy: Never
+          image: nayodya/automobile-backend:v1
+          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8080
             name: http
