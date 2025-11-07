@@ -913,9 +913,7 @@ deployment/
 │   │   └── network-policy.yaml
 │   ├── deploy.sh
 │   └── cleanup.sh
-│
-├── KUBERNETES_GUIDE.md
-└── DEPLOYMENT_SUMMARY.md (this file)
+
 ```
 
 ---
