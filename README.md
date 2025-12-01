@@ -1,12 +1,12 @@
-# Automobile Service - Minikube Deployment Guide
+# Automobile Service - Kubernetes Deployment Guide
 
-Quick deployment guide for running the Automobile Service application on Minikube.
+Kubernetes deployment guide for the Automobile Service application using external Azure PostgreSQL database.
 
 ## 📦 What's Included
 
 - **Backend**: Spring Boot API (Port 8080)
 - **Frontend**: React + Nginx (Port 80)
-- **Database**: PostgreSQL with persistent storage
+- **Database**: External Azure PostgreSQL (auto-service-db-server.postgres.database.azure.com)
 
 ## 🚀 Quick Start
 
@@ -57,7 +57,7 @@ chmod +x deploy.sh
 
 The script will:
 1. ✅ Create namespace
-2. ✅ Deploy PostgreSQL database
+2. ✅ Skip internal database (using external Azure PostgreSQL)
 3. ✅ Deploy backend (Spring Boot)
 4. ✅ Deploy frontend (React)
 5. ✅ Configure auto-scaling
@@ -79,8 +79,8 @@ kubectl port-forward service/frontend-service 8080:80 -n autoservice
 ```
 automobile-service-deployment/
 ├── backend/              # Backend K8s manifests
-│   ├── configmap.yaml   # Configuration
-│   ├── secret.yaml      # Secrets (DB, JWT, Email)
+│   ├── configmap.yaml   # Configuration (Azure PostgreSQL settings)
+│   ├── secret.yaml      # Secrets (DB password, JWT, Email)
 │   ├── deployment.yaml  # Deployment spec
 │   ├── service.yaml     # Service endpoint
 │   └── hpa.yaml         # Auto-scaling
@@ -89,18 +89,15 @@ automobile-service-deployment/
 │   ├── deployment.yaml  # Deployment spec
 │   ├── service.yaml     # LoadBalancer service
 │   └── hpa.yaml         # Auto-scaling
-├── database/            # Database K8s manifests
-│   ├── configmap.yaml   # PostgreSQL config
-│   ├── secret.yaml      # Database password
-│   ├── pvc.yaml         # Persistent volume
-│   ├── statefulset.yaml # StatefulSet
-│   └── service.yaml     # Service endpoint
 ├── common/              # Common resources
 │   ├── namespace.yaml   # Namespace definition
 │   ├── ingress.yaml     # Ingress rules
 │   └── network-policy.yaml # Network policies
-├── deploy.sh           # Automated deployment
-└── cleanup.sh          # Cleanup script
+├── deploy.sh            # Automated deployment script
+├── cleanup.sh           # Cleanup script
+└── docker-compose.yml   # Docker Compose for local development
+
+Note: Database folder removed - using external Azure PostgreSQL
 ```
 
 ## 🛠️ Management Commands
@@ -126,9 +123,6 @@ kubectl logs -f deployment/frontend-deployment -n autoservice
 
 # Backend logs
 kubectl logs -f deployment/backend-deployment -n autoservice
-
-# Database logs
-kubectl logs -f statefulset/postgres-statefulset -n autoservice
 ```
 
 ### Scale Deployments
@@ -146,20 +140,27 @@ kubectl scale deployment frontend-deployment --replicas=3 -n autoservice
 ### Update Secrets (Before First Deploy)
 
 **Backend Secret** (`backend/secret.yaml`):
-```bash
-# Encode your values
-echo -n 'your-password' | base64
-
+```yaml
 # Update in backend/secret.yaml:
-# - DB_PASSWORD
-# - JWT_SECRET
-# - EMAIL_PASSWORD
+stringData:
+  SPRING_DATASOURCE_PASSWORD: "test@1234"  # Azure PostgreSQL password
+  JWT_SECRET: "your-jwt-secret-key"
+  SPRING_MAIL_USERNAME: "your-email@gmail.com"
+  SPRING_MAIL_PASSWORD: "your-app-password"
 ```
 
-**Database Secret** (`database/secret.yaml`):
-```bash
-# Update POSTGRES_PASSWORD with base64 encoded value
+**Backend ConfigMap** (`backend/configmap.yaml`):
+```yaml
+# Azure PostgreSQL connection details are already configured:
+SPRING_DATASOURCE_URL: "jdbc:postgresql://auto-service-db-server.postgres.database.azure.com:5432/auto-service"
+SPRING_DATASOURCE_USERNAME: "test"
 ```
+
+**Azure PostgreSQL Setup:**
+- Ensure Azure PostgreSQL firewall allows connections from your Kubernetes cluster
+- Database: `auto-service`
+- Host: `auto-service-db-server.postgres.database.azure.com`
+- Port: `5432`
 
 ### Docker Images
 
@@ -201,15 +202,24 @@ kubectl port-forward <pod-name> 8080:80 -n autoservice
 
 ### Database Connection Issues
 
+**Using External Azure PostgreSQL:**
+
 ```bash
-# Check database pod
-kubectl get pods -n autoservice -l app=postgres
+# Check backend logs for database connection errors
+kubectl logs -f deployment/backend-deployment -n autoservice
 
-# Connect to database
-kubectl exec -it postgres-statefulset-0 -n autoservice -- psql -U postgres
+# Verify Azure PostgreSQL firewall rules allow your K8s cluster
+# Check in Azure Portal: PostgreSQL Server > Connection security
 
-# Check database logs
-kubectl logs postgres-statefulset-0 -n autoservice
+# Test connection from a pod
+kubectl run -it --rm debug --image=postgres:15-alpine -n autoservice -- \
+  psql -h auto-service-db-server.postgres.database.azure.com \
+       -U test -d auto-service
+
+# Common issues:
+# 1. Firewall rules not allowing K8s cluster IPs
+# 2. SSL connection required (may need sslmode=require in URL)
+# 3. Incorrect credentials in backend/secret.yaml
 ```
 
 ### Image Pull Issues
@@ -245,18 +255,23 @@ minikube delete
 |-----------|------------|----------------|----------|------------|
 | Frontend  | 100m       | 128Mi          | 2        | 2-10       |
 | Backend   | 250m       | 512Mi          | 2        | 2-10       |
-| Database  | 250m       | 256Mi          | 1        | N/A        |
+| Database  | External   | Azure PostgreSQL | N/A    | Azure-managed |
 
 Auto-scaling triggers at 70% CPU utilization.
 
-## 🔐 Default Credentials
+## 🔐 Database Credentials
 
-**Database:**
-- User: `postgres`
-- Password: Check `database/secret.yaml` (base64 encoded)
-- Database: `automobile_service`
+**Azure PostgreSQL:**
+- Host: `auto-service-db-server.postgres.database.azure.com`
+- Port: `5432`
+- Database: `auto-service`
+- User: `test`
+- Password: `test@1234` (configured in `backend/secret.yaml`)
 
-**Important:** Change default passwords in production!
+**Important:** 
+- Change default passwords in production!
+- Ensure Azure PostgreSQL firewall rules are properly configured
+- Consider using Azure Key Vault for production secrets
 
 ## 📝 Quick Reference
 

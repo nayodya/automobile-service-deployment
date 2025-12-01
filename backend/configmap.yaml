@@ -7,8 +7,9 @@ metadata:
   labels:
     app: backend
 data:
-  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/autoservice_db"
-  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://auto-service-db-server.postgres.database.azure.com:5432/auto-service"
+  SPRING_DATASOURCE_USERNAME: "test"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
   SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
   SPRING_JPA_SHOW_SQL: "false"
   SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
