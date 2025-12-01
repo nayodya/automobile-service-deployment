@@ -26,9 +26,6 @@ pipeline {
         BACKEND_DIR = "${WORKSPACE_ROOT}/backend"
         FRONTEND_DIR = "${WORKSPACE_ROOT}/frontend"
         DEPLOYMENT_DIR = "${WORKSPACE_ROOT}/deployment"
-        
-        // Host Docker Compose location
-        COMPOSE_DIR = '/mnt/e/EAD/automobile-service-deployment'
     }
 
     stages {
@@ -38,7 +35,7 @@ pipeline {
                     echo '========== STAGE: Initialize =========='
                     sh '''
                         echo "Workspace: ${WORKSPACE_ROOT}"
-                        echo "Using pre-configured Docker Compose at: ${COMPOSE_DIR}"
+                        echo "Deployment directory: ${DEPLOYMENT_DIR}"
                         echo "Current time: $(date)"
                         echo "Git available:"
                         git --version
@@ -153,7 +150,7 @@ pipeline {
                     echo '========== STAGE: Build Docker Images =========='
                     sh '''
                         echo "Building Docker images using docker-compose..."
-                        cd /mnt/e/EAD/automobile-service-deployment
+                        cd ${DEPLOYMENT_DIR}
                         
                         echo "Note: Docker images will be built on the host system"
                         echo "Jenkins will trigger Docker Compose to rebuild images with latest code"
@@ -190,7 +187,7 @@ pipeline {
                     echo '========== STAGE: Deploy with Docker Compose =========='
                     sh '''
                         echo "Deploying with Docker Compose..."
-                        cd /mnt/e/EAD/automobile-service-deployment
+                        cd ${DEPLOYMENT_DIR}
                         
                         echo "Stopping existing services..."
                         docker-compose down || true
