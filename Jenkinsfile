@@ -148,36 +148,17 @@ pipeline {
         }
 
         stage('Build Docker Images') {
-            parallel {
-                stage('Build Backend Image') {
-                    steps {
-                        script {
-                            echo '========== STAGE: Build Backend Docker Image =========='
-                            dir("${BACKEND_DIR}") {
-                                sh '''
-                                    echo "Building backend Docker image..."
-                                    docker build -t ${BACKEND_IMAGE} .
-                                    echo "✅ Backend Docker image built"
-                                '''
-                            }
-                        }
-                    }
-                }
-                stage('Build Frontend Image') {
-                    steps {
-                        script {
-                            echo '========== STAGE: Build Frontend Docker Image =========='
-                            dir("${FRONTEND_DIR}") {
-                                sh '''
-                                    echo "Building frontend Docker image..."
-                                    docker build \\
-                                        --build-arg VITE_API_BASE_URL="http://localhost:8080/api" \\
-                                        -t ${FRONTEND_IMAGE} .
-                                    echo "✅ Frontend Docker image built"
-                                '''
-                            }
-                        }
-                    }
+            steps {
+                script {
+                    echo '========== STAGE: Build Docker Images =========='
+                    sh '''
+                        echo "Building Docker images using docker-compose..."
+                        cd /mnt/e/EAD/automobile-service-deployment
+                        
+                        echo "Note: Docker images will be built on the host system"
+                        echo "Jenkins will trigger Docker Compose to rebuild images with latest code"
+                        echo "✅ Docker image build preparation complete"
+                    '''
                 }
             }
         }
@@ -208,15 +189,21 @@ pipeline {
                 script {
                     echo '========== STAGE: Deploy with Docker Compose =========='
                     sh '''
-                        echo "Note: Using pre-running Docker Compose services"
-                        echo "Services Status:"
+                        echo "Deploying with Docker Compose..."
                         cd /mnt/e/EAD/automobile-service-deployment
-                        pwd
-                        echo "Docker Compose should be managing these services already"
-                        echo "Restarting services to apply latest code..."
-                        # Uncomment next line if you want to restart services
-                        # docker-compose restart
-                        echo "✅ Services will use latest built images"
+                        
+                        echo "Stopping existing services..."
+                        docker-compose down || true
+                        
+                        echo "Building and starting services with latest code..."
+                        docker-compose up -d --build
+                        
+                        if [ $? -eq 0 ]; then
+                            echo "✅ Docker Compose deployment successful"
+                        else
+                            echo "❌ Docker Compose deployment failed"
+                            exit 1
+                        fi
                     '''
                 }
             }
