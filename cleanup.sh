@@ -66,24 +66,9 @@ kubectl delete -f backend/configmap.yaml --ignore-not-found=true
 print_success "Backend components deleted"
 
 # Delete database
-echo "Deleting database components..."
-kubectl delete -f database/service.yaml --ignore-not-found=true
-kubectl delete -f database/statefulset.yaml --ignore-not-found=true
-kubectl delete -f database/secret.yaml --ignore-not-found=true
-kubectl delete -f database/configmap.yaml --ignore-not-found=true
-print_success "Database components deleted"
-
-# Ask about PVC deletion
-echo ""
-print_warning "Database PVC contains persistent data."
-read -p "Do you want to delete the PVC? This will delete all data! (yes/no): " delete_pvc
-
-if [ "$delete_pvc" == "yes" ]; then
-    kubectl delete -f database/pvc.yaml --ignore-not-found=true
-    print_success "PVC deleted"
-else
-    print_warning "PVC retained (data preserved)"
-fi
+# NOTE: Database cleanup skipped - using external Azure PostgreSQL database
+echo "Skipping database cleanup (using external Azure PostgreSQL)..."
+print_success "Database cleanup skipped (external database)"
 
 # Ask about namespace deletion
 echo ""

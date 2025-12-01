@@ -52,19 +52,9 @@ print_success "Namespace created"
 echo ""
 
 # Step 2: Deploy database components
-echo "Step 2: Deploying database..."
-kubectl apply -f database/configmap.yaml
-kubectl apply -f database/secret.yaml
-kubectl apply -f database/pvc.yaml
-kubectl apply -f database/statefulset.yaml
-kubectl apply -f database/service.yaml
-print_success "Database components deployed"
-echo ""
-
-# Wait for database to be ready
-echo "Waiting for database to be ready..."
-kubectl wait --for=condition=ready pod -l app=postgres -n autoservice --timeout=300s
-print_success "Database is ready"
+# NOTE: Database deployment skipped - using external Azure PostgreSQL database
+echo "Step 2: Skipping database deployment (using external Azure PostgreSQL)..."
+print_info "Using external Azure PostgreSQL: auto-service-db-server.postgres.database.azure.com"
 echo ""
 
 # Step 3: Deploy backend components
